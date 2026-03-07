@@ -28,7 +28,90 @@
       color:#0f172a;
       font-family:Arial,sans-serif;
     }
-  </style>
+  
+@page {
+  size: A4;
+  margin: 8mm;
+}
+
+@media print {
+  html, body {
+    width: 210mm;
+    min-height: 297mm;
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #pdfRoot, #pdfRoot * {
+    visibility: visible;
+  }
+
+  #pdfRoot {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 194mm !important;
+    min-height: auto !important;
+    padding: 6mm !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  #pdfRoot table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 10px !important;
+  }
+
+  #pdfRoot th, #pdfRoot td {
+    padding: 4px !important;
+  }
+
+  #pdfRoot .text-xl { font-size: 18px !important; }
+  #pdfRoot .text-sm { font-size: 11px !important; }
+  #pdfRoot .text-xs { font-size: 10px !important; }
+
+  #pdfRoot .mt-5 { margin-top: 10px !important; }
+  #pdfRoot .mt-4 { margin-top: 8px !important; }
+  #pdfRoot .mt-3 { margin-top: 6px !important; }
+  #pdfRoot .p-4 { padding: 8px !important; }
+  #pdfRoot .p-10 { padding: 10px !important; }
+
+  #pdfAutor, #pdfLegal {
+    display: none !important;
+  }
+}
+
+
+/* Ajuste de columnas del informe para que la descripción tenga mucho más ancho */
+#pdfRoot table {
+  table-layout: fixed;
+  width: 100%;
+}
+#pdfRoot table th:nth-child(1), #pdfRoot table td:nth-child(1) { width: 12%; } /* Código */
+#pdfRoot table th:nth-child(2), #pdfRoot table td:nth-child(2) { width: 50%; } /* Descripción */
+#pdfRoot table th:nth-child(3), #pdfRoot table td:nth-child(3) { width: 9%; }  /* Línea */
+#pdfRoot table th:nth-child(4), #pdfRoot table td:nth-child(4) { width: 8%; }  /* Cantidad */
+#pdfRoot table th:nth-child(5), #pdfRoot table td:nth-child(5) { width: 10%; } /* PVP */
+#pdfRoot table th:nth-child(6), #pdfRoot table td:nth-child(6) { width: 11%; } /* Importe */
+
+#pdfRoot table td:nth-child(2), #pdfRoot table th:nth-child(2) {
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+#pdfRoot table td:not(:nth-child(2)), #pdfRoot table th:not(:nth-child(2)) {
+  white-space: nowrap;
+}
+
+</style>
 </head>
 <body class="min-h-screen">
 <header class="sticky top-0 z-40 backdrop-blur bg-slate-950/55 border-b border-white/10">
@@ -193,7 +276,7 @@
               <th class="px-4 py-3">Código</th>
               <th class="px-4 py-3">Descripción</th>
               <th class="px-4 py-3">Línea</th>
-              <th class="px-4 py-3 text-right">Cantidad</th>
+              <th class="px-4 py-3 text-right">Cant.</th>
               <th class="px-4 py-3 text-right">PVP</th>
               <th class="px-4 py-3 text-right">Importe</th>
             </tr>
@@ -223,31 +306,38 @@
   </section>
 
   
-<div id="luciaLauncher" class="fixed bottom-6 right-6 z-50 cursor-pointer">
-  <div class="card rounded-2xl p-3 flex items-center gap-3 shadow-xl" onclick="openLucia()">
-    <img src="./lucia.jpeg" class="h-12 w-12 rounded-xl object-cover">
+
+<div id="luciaLauncher" class="fixed bottom-6 right-6 z-50">
+  <button type="button" onclick="openLucia()" class="card rounded-2xl p-3 flex items-center gap-3 shadow-xl hover:scale-[1.01] transition">
+    <img src="./lucia.jpeg" class="h-12 w-12 rounded-xl object-cover" alt="Lucía">
     <div class="text-sm font-semibold text-slate-900">Asistente calculadora VMC</div>
-  </div>
+  </button>
 </div>
 
 <div id="luciaChatBox" class="hidden fixed bottom-6 right-6 w-80 z-50">
   <div class="card rounded-3xl overflow-hidden flex flex-col h-[420px] shadow-2xl">
-    <div class="p-4 border-b flex justify-between items-center">
+    <div class="p-4 border-b flex justify-between items-center bg-white/70">
       <div class="flex items-center gap-3">
-        <img src="./lucia.jpeg" class="h-10 w-10 rounded-xl object-cover">
-        <div class="text-sm font-semibold">Lucía · Asistente VMC</div>
+        <img src="./lucia.jpeg" class="h-10 w-10 rounded-xl object-cover" alt="Lucía">
+        <div class="text-sm font-semibold text-slate-900">Lucía · Asistente VMC</div>
       </div>
-      <button onclick="closeLucia()" class="text-slate-500 hover:text-slate-800 font-bold">✕</button>
+      <button type="button" onclick="closeLucia()" class="text-slate-500 hover:text-slate-800 font-bold text-lg leading-none">✕</button>
     </div>
     <div id="chat" class="flex-1 p-4 overflow-auto bg-white/65 space-y-3 nice"></div>
     <div class="p-4 border-t bg-white/75">
       <div class="flex gap-2">
         <input id="chatInput" class="flex-1 rounded-xl border px-3 py-2" placeholder="Escribe tu pregunta…">
-        <button id="chatSend" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold">Enviar</button>
+        <button id="chatSend" type="button" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold">Enviar</button>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2 text-xs">
+        <button type="button" class="px-2 py-1 rounded-full bg-slate-100 hover:bg-slate-200" onclick="chatInput.value='¿Cómo funciona la web?'; enviarChat();">Cómo funciona</button>
+        <button type="button" class="px-2 py-1 rounded-full bg-slate-100 hover:bg-slate-200" onclick="chatInput.value='Explícame la normativa HS3'; enviarChat();">Normativa HS3</button>
+        <button type="button" class="px-2 py-1 rounded-full bg-slate-100 hover:bg-slate-200" onclick="chatInput.value='¿Por qué se selecciona este sistema?'; enviarChat();">Sistema</button>
+        <button type="button" class="px-2 py-1 rounded-full bg-slate-100 hover:bg-slate-200" onclick="chatInput.value='Explícame la lista de materiales'; enviarChat();">Materiales</button>
+        <button type="button" class="px-2 py-1 rounded-full bg-slate-100 hover:bg-slate-200" onclick="chatInput.value='¿Cómo funciona el PDF?'; enviarChat();">PDF</button>
       </div>
     </div>
   </div>
-</div>
 </div>
 </main>
 
@@ -257,8 +347,8 @@
       <div class="flex items-center gap-4">
         <img src="./logomundoclima.jpeg" style="height:56px" alt="Mundoclima">
         <div>
-          <div class="text-xl font-extrabold">Informe de cálculo VMC</div>
-          <div class="text-sm text-slate-600">Calculadora VMC Mundoclima con IA comercial integrada</div>
+          <div class="text-xl font-extrabold">INFORME TÉCNICO DE VENTILACIÓN MECÁNICA CONTROLADA</div>
+          <div class="text-sm text-slate-600">Sistema VMC Mundoclima · Documento generado automáticamente</div>
         </div>
       </div>
       <div class="text-right text-sm text-slate-600" id="pdfFechaTxt"></div>
@@ -288,7 +378,7 @@
             <th class="border p-2 text-left">Código</th>
             <th class="border p-2 text-left">Descripción</th>
             <th class="border p-2 text-left">Línea</th>
-            <th class="border p-2 text-right">Cantidad</th>
+            <th class="border p-2 text-right">Cant.</th>
             <th class="border p-2 text-right">PVP</th>
             <th class="border p-2 text-right">Importe</th>
           </tr>
@@ -304,11 +394,11 @@
       </div>
     </div>
 
-    <div class="mt-5 rounded-2xl border border-slate-200 p-4 text-xs">
+    <div id="pdfLegal" class="mt-5 rounded-2xl border border-slate-200 p-4 text-xs">
       Los precios indicados son orientativos y pueden sufrir variaciones. El presente documento no constituye una oferta vinculante. Para una oferta formal consulte con el Departamento Comercial de Salvador Escoda S.A.
     </div>
 
-    <div class="mt-5 rounded-2xl border border-slate-200 p-4">
+    <div id="pdfAutor" class="mt-5 rounded-2xl border border-slate-200 p-4">
       <div class="grid grid-cols-[110px_1fr] gap-4 items-center">
         <img src="./jordi.png" style="width:96px;height:128px;object-fit:contain;background:#f8fafc;border-radius:16px;padding:4px" alt="Jordi Salvador">
         <div class="text-sm">
@@ -763,6 +853,7 @@ function fillPdf(){
 
 
 
+
 function descargarPDF(){
   try{
     if(!window.__STATE__) calcular();
@@ -784,57 +875,68 @@ function descargarPDF(){
         <meta charset="UTF-8">
         <title>Informe VMC Mundoclima</title>
         <style>
-          @page { size: A4; margin: 10mm; }
+          @page { size: A4; margin: 8mm; }
           html, body { margin:0; padding:0; background:#fff; color:#000; font-family: Arial, sans-serif; }
-          body { padding: 0; }
           * { box-sizing: border-box; }
-          img { max-width: 100%; }
-          table { width:100%; border-collapse: collapse; }
-          th, td { border:1px solid #cbd5e1; padding:6px; font-size:12px; vertical-align: top; }
+          body { width: 210mm; }
+          img { max-width: 100%; display:block; }
+          table { width:100%; border-collapse: collapse; table-layout: fixed; }
+          th, td { border:1px solid #cbd5e1; padding:3px 4px; font-size:9px; vertical-align: top; }
+          th:nth-child(1), td:nth-child(1) { width:12%; }
+          th:nth-child(2), td:nth-child(2) { width:50%; }
+          th:nth-child(3), td:nth-child(3) { width:9%; }
+          th:nth-child(4), td:nth-child(4) { width:8%; }
+          th:nth-child(5), td:nth-child(5) { width:10%; }
+          th:nth-child(6), td:nth-child(6) { width:11%; }
+          th:nth-child(2), td:nth-child(2) { white-space:normal; overflow-wrap:anywhere; line-height:1.1; }
+          th:not(:nth-child(2)), td:not(:nth-child(2)) { white-space:nowrap; }
           .border { border:1px solid #cbd5e1; }
           .border-collapse { border-collapse: collapse; }
-          .rounded-2xl, .rounded-xl, .rounded-3xl { border-radius: 12px; }
-          .p-10 { padding: 24px; }
-          .p-4 { padding: 12px; }
-          .p-2 { padding: 6px; }
-          .mt-2 { margin-top: 8px; }
-          .mt-3 { margin-top: 12px; }
-          .mt-4 { margin-top: 16px; }
-          .mt-5 { margin-top: 20px; }
+          .rounded-2xl, .rounded-xl, .rounded-3xl { border-radius: 10px; }
+          .p-10 { padding: 10px; }
+          .p-4 { padding: 8px; }
+          .p-2 { padding: 4px; }
+          .mt-2 { margin-top: 6px; }
+          .mt-3 { margin-top: 8px; }
+          .mt-4 { margin-top: 10px; }
+          .mt-5 { margin-top: 10px; }
           .grid { display: grid; }
           .grid-cols-2 { grid-template-columns: 1fr 1fr; }
-          .gap-4 { gap: 16px; }
+          .grid-cols-\[110px_1fr\] { grid-template-columns: 90px 1fr; }
+          .gap-4 { gap: 8px; }
           .items-center { align-items: center; }
           .flex { display:flex; }
           .justify-between { justify-content: space-between; }
           .justify-end { justify-content:flex-end; }
           .items-start { align-items:flex-start; }
-          .gap-6 { gap: 24px; }
+          .gap-6 { gap: 10px; }
           .text-right { text-align:right; }
           .text-left { text-align:left; }
-          .text-xs { font-size: 11px; }
-          .text-sm { font-size: 12px; }
-          .text-xl { font-size: 22px; }
+          .text-xs { font-size: 10px; }
+          .text-sm { font-size: 10px; }
+          .text-xl { font-size: 16px; }
           .font-semibold, .font-extrabold { font-weight: 700; }
-          .w-80 { width: 320px; }
+          .w-80 { width: 300px; }
           .bg-slate-50 { background: #f8fafc; }
           .text-slate-600 { color:#475569; }
           .text-slate-900 { color:#0f172a; }
+          #pdfAutor, #pdfLegal { display:none; }
         </style>
       </head>
       <body>
-        <div style="width:190mm; margin:0 auto;">
+        <div style="width:194mm; margin:0 auto;">
           ${contenido}
         </div>
+        <script>
+          setTimeout(function(){
+            window.focus();
+            window.print();
+          }, 500);
+        <\/script>
       </body>
       </html>
     `);
     w.document.close();
-
-    setTimeout(() => {
-      w.focus();
-      w.print();
-    }, 600);
   }catch(e){
     console.error(e);
     alert('Error generando PDF. Usa Imprimir / Guardar como PDF del navegador.');
@@ -856,26 +958,97 @@ function say(role, text){
   chat.scrollTop = chat.scrollHeight;
 }
 
-function respuestaLucia(q){
-  q = q.toLowerCase();
-  if(q.includes('hs3')) return 'El cálculo sigue el CTE HS3: dormitorio principal 28,8 m³/h, secundarios 14,4 m³/h y salas/comedor según la tipología.';
-  if(q.includes('aria')) return 'ARIA CONNECT es la red semiflexible antibacteriana. ARIA ADURO es la red rígida aislada para tramos principales.';
-  if(q.includes('pdf')) return 'El PDF incluye cliente, obra, comercial, fecha, materiales, precios, descuento, total y aviso comercial.';
-  return 'Puedo ayudarte con HS3, recuperadores ELEGANCE, ARIA CONNECT, bocas BAMJ, MVF y el informe PDF.';
-}
 
+function respuestaLucia(q){
+  const s = window.__STATE__;
+  const t = (q || '').toLowerCase().trim();
+  const has = (...words) => words.some(w => t.includes(w));
+
+  if(has('hola','buenas','ayuda','qué puedes hacer','que puedes hacer','qué haces','que haces')){
+    return 'Puedo ayudarte a entender cómo funciona la calculadora: datos de vivienda, normativa HS3, selección de sistema 125 o 160, materiales, descuento e informe PDF. También puedo explicarte por qué sale un determinado caudal o una lista de materiales concreta.';
+  }
+
+  if(has('funciona la web','cómo funciona la web','como funciona la web','usar la calculadora','como usar','cómo se usa','como se usa')){
+    return 'La web funciona en cuatro pasos. Primero introduces cliente, obra y datos de la vivienda. Segundo eliges el tipo de regulación: bocas autoregulables o MVF. Tercero pulsas Calcular para obtener el caudal, el sistema recomendado y la lista de materiales. Por último puedes obtener el informe desde el botón PDF.';
+  }
+
+  if(has('hs3','normativa','cte')){
+    return 'La calculadora sigue el CTE DB HS3 para viviendas. Usa el número de dormitorios para fijar el caudal de impulsión en dormitorios y sala de estar, y exige un mínimo total y un mínimo por local en las zonas húmedas. Después traduce esos caudales normativos a valores comerciales de 15, 30, 45, 60, 90 o 120 m³/h.';
+  }
+
+  if(has('dormitorio principal','dormitorio secundario','resto dormitorios','salón','salon','comedor')){
+    return 'En HS3 el dormitorio principal exige 28,8 m³/h. Los dormitorios secundarios exigen 14,4 m³/h cuando la vivienda tiene dos dormitorios o más. Las salas de estar y comedores exigen 21,6 m³/h en viviendas de 0 o 1 dormitorio, 28,8 m³/h en viviendas de 2 dormitorios y 36 m³/h en viviendas de 3 o más.';
+  }
+
+  if(has('húmed','humed','baño','baños','cocina','lavadero')){
+    return 'En las zonas húmedas la calculadora no solo mira cada local por separado. También verifica el mínimo total de extracción. Luego reparte el caudal entre cocina, lavadero y baños, respetando el mínimo por local y el mínimo total exigido por HS3.';
+  }
+
+  if(has('caudal','resultado','qué ha calculado','que ha calculado','por qué sale','por que sale')){
+    if(!s) return 'Todavía no hay un cálculo activo. Rellena los datos de la vivienda y pulsa Calcular. Entonces podré explicarte el caudal total, el sistema elegido y los materiales generados.';
+    return 'Con los datos actuales, el caudal total calculado es de ' + s.total.toFixed(1) + ' m³/h. La impulsión aplicada en zonas secas es de ' + s.dry.applied.toFixed(1) + ' m³/h y la extracción aplicada en zonas húmedas es de ' + s.wet.applied.toFixed(1) + ' m³/h. La calculadora toma el valor más exigente para dimensionar el sistema.';
+  }
+
+  if(has('sistema 125','sistema 160','por qué 125','por qué 160','por que 125','por que 160','recuperador','equipo','sistema seleccionado')){
+    if(!s) return 'El sistema se decide por caudal. Hasta 150 m³/h se usa sistema 125 con recuperador ELEGANCE 150; de 151 a 300 m³/h se usa sistema 160 con recuperador ELEGANCE 300.';
+    if(s.b.sys === '125'){
+      return 'Con el cálculo actual se selecciona el sistema 125 porque el caudal total no supera 150 m³/h. Por eso también se recomienda el recuperador ELEGANCE 150.';
+    }
+    return 'Con el cálculo actual se selecciona el sistema 160 porque el caudal total supera 150 m³/h. Por eso también se recomienda el recuperador ELEGANCE 300.';
+  }
+
+  if(has('bocas','mvf','autoregulables','autoreg','rondo','slimvalve','kvadro','sr','regulación','regulacion')){
+    if(!s) return 'La regulación tiene dos modos. Con bocas autoregulables se montan directamente las BAMJ según el caudal. Con MVF se monta un regulador de caudal constante y además una boca decorativa, que puede ser Slimvalve, Rondo, Kvadro o SR.';
+    if(s.i.reg === 'BAMJ'){
+      return 'Ahora mismo está seleccionada la regulación por bocas autoregulables. En este modo la calculadora monta directamente las bocas BAMJ y no muestra ni añade bocas decorativas.';
+    }
+    return 'Ahora mismo está seleccionada la regulación por caudal constante MVF con boca decorativa ' + s.i.decor + '. En este modo la calculadora añade los reguladores MVF según el caudal de cada estancia y además una boca decorativa por punto terminal.';
+  }
+
+  if(has('materiales','bom','lista de materiales','conducto','conductos','plenum','plenums','cajas','clips','silenciador','manguito')){
+    if(!s) return 'La lista de materiales se genera después de calcular. Incluye recuperador, cajas de distribución, conectores laterales, acoplamientos, plenums, rollos de conducto, clips, aislado, codos, silenciadores, manguitos y elementos terminales.';
+    return 'La lista actual incluye ' + s.b.items.length + ' líneas. Se calculan ' + s.b.rolls + ' rollos de conducto, ' + s.b.secCount + ' plenums de impulsión y ' + s.b.humCount + ' plenums de retorno. También se añaden cajas de distribución según el número de estancias: ' + s.b.boxSec.boxes + ' para impulsión y ' + s.b.boxHum.boxes + ' para retorno.';
+  }
+
+  if(has('descuento','55','precio','precios','total','subtotal')){
+    if(!s) return 'El descuento estándar es 45 %. Puedes modificarlo manualmente, pero si superas el 55 % la web bloquea la operación y muestra el aviso de consultar con el departamento de ventilación.';
+    return 'Con el cálculo actual el subtotal es ' + eur(s.b.subtotal) + '. El descuento aplicado es del ' + s.i.desc + '% y el total final es ' + eur(s.b.total) + '. Recuerda que por encima del 55 % la herramienta bloquea el cálculo comercial.';
+  }
+
+  if(has('pdf','informe','descargar','imprimir')){
+    return 'El botón PDF abre una versión imprimible del informe técnico. Desde la ventana de impresión puedes guardarlo como PDF. El informe incluye cliente, obra, comercial, fecha, resumen técnico, materiales, precios, descuento, total y aviso legal.';
+  }
+
+  if(has('lucía','lucia','chatbot','asistente')){
+    return 'Lucía es un asistente de apoyo. No sustituye al motor de cálculo. Su función es explicarte la normativa HS3, el uso de la web, la lógica de selección de materiales, el tipo de regulación y el contenido del informe.';
+  }
+
+  if(has('empresa','proyecto','tfm','founderz')){
+    return 'La herramienta forma parte de un proyecto de IA aplicada orientado al ámbito HVAC. Su objetivo es automatizar el cálculo VMC, dar soporte comercial y generar documentación técnica con una interfaz sencilla y una capa explicativa mediante IA.';
+  }
+
+  if(s){
+    return 'Ahora mismo la calculadora tiene un resultado activo de ' + s.total.toFixed(1) + ' m³/h con sistema ' + s.b.sys + ' y regulación ' + (s.i.reg === 'BAMJ' ? 'bocas autoregulables' : 'MVF') + '. Puedes preguntarme por caudal, normativa HS3, sistema seleccionado, materiales, descuento o PDF.';
+  }
+
+  return 'Puedo ayudarte con estas cuestiones: cómo usar la web, normativa HS3, cálculo de caudal, selección de sistema 125 o 160, materiales, regulación BAMJ o MVF, descuento y generación del PDF.';
+}
 
 function openLucia(){
-  document.getElementById('luciaLauncher').classList.add('hidden');
-  document.getElementById('luciaChatBox').classList.remove('hidden');
+  const launcher = document.getElementById('luciaLauncher');
+  const box = document.getElementById('luciaChatBox');
+  if(launcher) launcher.classList.add('hidden');
+  if(box) box.classList.remove('hidden');
 }
-
 function closeLucia(){
-  document.getElementById('luciaChatBox').classList.add('hidden');
-  document.getElementById('luciaLauncher').classList.remove('hidden');
+  const launcher = document.getElementById('luciaLauncher');
+  const box = document.getElementById('luciaChatBox');
+  if(box) box.classList.add('hidden');
+  if(launcher) launcher.classList.remove('hidden');
 }
 
 function enviarChat(){
+
 
   const q = chatInput.value.trim();
   if(!q) return;
@@ -930,7 +1103,7 @@ function resetAll(){
 
   hideAlert();
   toggleDecorativa();
-  say('b', 'Hola, soy Lucía 👋 Puedo ayudarte con HS3, recuperadores ELEGANCE, ARIA CONNECT y el informe PDF.');
+  say('b', 'Hola, soy Lucía 👋 Soy el asistente de la calculadora VMC. Puedo explicarte cómo usar la web, la normativa HS3, por qué sale un sistema u otro, cómo se genera la lista de materiales y cómo obtener el PDF.');
 }
 
 fillSelect('dormitorios',0,10,2);
