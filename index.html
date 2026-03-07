@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora VMC Mundoclima con IA comercial integrada</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body{
+      background:
+        linear-gradient(135deg, rgba(2,6,23,.62), rgba(2,6,23,.48)),
+        url('./tecnicos.png') center/cover fixed;
+    }
+    .card{ backdrop-filter: blur(6px); background: rgba(255,255,255,0.78);
+      background: rgba(255,255,255,.98);
+      border: 1px solid rgba(15,23,42,.08);
+      box-shadow: 0 16px 40px rgba(0,0,0,.18);
+    }
+    .nice::-webkit-scrollbar{width:10px}
+    .nice::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
+    .nice::-webkit-scrollbar-track{background:#f1f5f9}
+    #pdfRoot{
+      width:794px;
+      min-height:1123px;
+      background:#fff;
+      color:#0f172a;
+      font-family:Arial,sans-serif;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+<header class="sticky top-0 z-40 backdrop-blur bg-slate-950/55 border-b border-white/10">
+  <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <img src="./logomundoclima.jpeg" class="h-12 rounded bg-white p-1" alt="Mundoclima">
+      <div>
+        <h1 class="text-white text-xl font-semibold">Calculadora VMC Mundoclima con IA comercial integrada</h1>
+        <p class="text-slate-200 text-sm">Versión Online 2.0 · CTE DB HS3 · Salvador Escoda S.A.</p>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button id="btnEjemplo" class="px-3 py-2 rounded-xl text-white bg-white/10 hover:bg-white/15">Ejemplo</button>
+      <button id="btnReset" class="px-3 py-2 rounded-xl text-white bg-white/10 hover:bg-white/15">Reiniciar</button>
+      <button id="btnPDFTop" class="px-3 py-2 rounded-xl text-white bg-white/10 hover:bg-white/15">PDF</button>
+    </div>
+  </div>
+</header>
+
+<main class="mx-auto max-w-7xl px-4 py-8 grid lg:grid-cols-8 gap-6">
+  <section class="lg:col-span-8 space-y-6">
+    <div class="card rounded-3xl p-6">
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="space-y-5">
+          <div>
+            <h2 class="text-xl font-semibold text-slate-900">Datos del proyecto</h2>
+            <div class="grid grid-cols-2 gap-3 mt-3">
+              <div><label class="text-xs text-slate-600">Cliente</label><input id="cliente" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></div>
+              <div><label class="text-xs text-slate-600">Obra</label><input id="obra" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></div>
+              <div><label class="text-xs text-slate-600">Comercial</label><input id="comercial" value="Jordi Salvador Noya" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></div>
+              <div><label class="text-xs text-slate-600">Fecha</label><input id="fecha" type="date" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900 mb-3">Vivienda y estancias</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="text-xs text-slate-600">Superficie (m²)</label><input id="m2" type="number" value="90" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></div>
+              <div><label class="text-xs text-slate-600">Dormitorios</label><select id="dormitorios" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></select></div>
+              <div><label class="text-xs text-slate-600">Baños</label><select id="banos" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></select></div>
+              <div><label class="text-xs text-slate-600">Cocinas</label><select id="cocinas" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></select></div>
+              <div><label class="text-xs text-slate-600">Lavaderos</label><select id="lavaderos" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></select></div>
+              <div><label class="text-xs text-slate-600">Salón / estar</label><select id="salon" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></select></div>
+              <div><label class="text-xs text-slate-600">Comedores</label><select id="comedor" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></select></div>
+              <div><label class="text-xs text-slate-600">Despachos</label><select id="despacho" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></select></div>
+              <div><label class="text-xs text-slate-600">Otras secas</label><select id="otrasSecas" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></select></div>
+              <div class="rounded-2xl bg-white/55 border border-slate-200 p-3">
+                <div class="text-xs text-slate-500">Tipología HS3</div>
+                <div id="tipologia" class="text-lg font-bold mt-1">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900 mb-3">Regulación</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-slate-600">Tipo de regulación</label>
+                <select id="regulacion" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2">
+                  <option value="BAMJ">Bocas autoregulables</option>
+                  <option value="MVF" selected>Reguladores de caudal constante</option>
+                </select>
+              </div>
+              <div id="decorativaWrap">
+                <label class="text-xs text-slate-600">Boca decorativa</label>
+                <select id="decorativa" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2">
+                  <option value="SLIMVALVE">SLIMVALVE</option>
+                  <option value="RONDO" selected>RONDO</option>
+                  <option value="KVADRO">KVADRO</option>
+                  <option value="SR">SR</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900 mb-3">Instalación</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="text-xs text-slate-600">Aislado impulsión (m)</label><input id="aisladoImp" type="number" placeholder="10 por defecto" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></div>
+              <div><label class="text-xs text-slate-600">Aislado retorno (m)</label><input id="aisladoRet" type="number" placeholder="10 por defecto" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></div>
+              <div><label class="text-xs text-slate-600">Codos impulsión</label><input id="codosImp" type="number" placeholder="2 por defecto" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></div>
+              <div><label class="text-xs text-slate-600">Codos retorno</label><input id="codosRet" type="number" placeholder="2 por defecto" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></div>
+              <div class="col-span-2 flex items-center justify-between rounded-2xl bg-white/55 border border-slate-200 p-3">
+                <div>
+                  <div class="font-medium text-slate-900">Silenciadores</div>
+                  <div class="text-xs text-slate-500">1 en impulsión y 1 en retorno por defecto</div>
+                </div>
+                <input id="silenciadores" type="checkbox" checked class="accent-sky-600">
+              </div>
+              <div><label class="text-xs text-slate-600">Descuento (%)</label><input id="descuento" type="number" value="45" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"></div>
+              <div class="rounded-2xl bg-white/55 border border-slate-200 p-3">
+                <div class="text-xs text-slate-500">Descuento estándar</div>
+                <div class="text-sm text-slate-900 mt-1">45%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button id="btnCalcular" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold">Calcular</button>
+            <button id="btnPDF" class="px-4 py-2 rounded-xl bg-white/60 border border-slate-200 font-semibold">Descargar PDF</button>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div id="alerta" class="hidden rounded-2xl px-4 py-3 text-sm border"></div>
+
+          <div class="rounded-3xl bg-gradient-to-br from-sky-50 to-indigo-50 border border-slate-200 p-5">
+            <div class="flex justify-between gap-3">
+              <div>
+                <div class="text-xs text-slate-600">Caudal total</div>
+                <div id="caudalTotal" class="text-4xl font-extrabold mt-1 text-slate-900">—</div>
+                <div class="text-xs text-slate-500">m³/h</div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-slate-600">Sistema / recuperador</div>
+                <div id="sistema" class="text-lg font-semibold mt-1 text-slate-900">—</div>
+                <div id="equipo" class="text-xs text-slate-600 mt-1">—</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3 mt-4">
+              <div class="rounded-2xl bg-white/60 border border-slate-200 p-3"><div class="text-xs text-slate-600">Secas</div><div id="secas" class="text-lg font-bold mt-1">—</div></div>
+              <div class="rounded-2xl bg-white/60 border border-slate-200 p-3"><div class="text-xs text-slate-600">Húmedas</div><div id="humedas" class="text-lg font-bold mt-1">—</div></div>
+              <div class="rounded-2xl bg-white/60 border border-slate-200 p-3"><div class="text-xs text-slate-600">Rollos</div><div id="rollos" class="text-lg font-bold mt-1">—</div></div>
+            </div>
+          </div>
+
+          <div class="rounded-3xl bg-white/60 border border-slate-200 p-5">
+            <h3 class="font-semibold text-slate-900">Resumen</h3>
+            <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
+              <div class="rounded-2xl bg-white/55 border border-slate-200 p-3"><div class="text-xs text-slate-600">Cajas secas / húmedas</div><div id="cajas" class="font-bold mt-1">—</div></div>
+              <div class="rounded-2xl bg-white/55 border border-slate-200 p-3"><div class="text-xs text-slate-600">Plenums secos / húmedos</div><div id="plenums" class="font-bold mt-1">—</div></div>
+              <div class="rounded-2xl bg-white/55 border border-slate-200 p-3"><div class="text-xs text-slate-600">Secos aplicados</div><div id="secosApl" class="font-bold mt-1">—</div></div>
+              <div class="rounded-2xl bg-white/55 border border-slate-200 p-3"><div class="text-xs text-slate-600">Húmedos aplicados</div><div id="humApl" class="font-bold mt-1">—</div></div>
+            </div>
+          </div>
+
+          <div class="rounded-3xl bg-white/60 border border-slate-200 p-5">
+            <h3 class="font-semibold text-slate-900">Detalle HS3</h3>
+            <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
+              <div class="rounded-2xl bg-white/55 border border-slate-200 p-3">
+                <div class="flex justify-between"><span>Dormitorio principal</span><b id="b_dp">—</b></div>
+                <div class="flex justify-between"><span>Resto dormitorios</span><b id="b_resto">—</b></div>
+                <div class="flex justify-between"><span>Salón/comedor y similares</span><b id="b_salon">—</b></div>
+              </div>
+              <div class="rounded-2xl bg-white/55 border border-slate-200 p-3">
+                <div class="flex justify-between"><span>Nº húmedos</span><b id="b_hn">—</b></div>
+                <div class="flex justify-between"><span>Mín. por local</span><b id="b_hlocal">—</b></div>
+                <div class="flex justify-between"><span>Mín. total húmedos</span><b id="b_htotal">—</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card rounded-3xl overflow-hidden">
+      <div class="p-4 border-b border-slate-200"><h3 class="font-semibold text-slate-900">Lista de materiales</h3></div>
+      <div class="overflow-auto max-h-[420px] nice">
+        <table class="w-full text-sm">
+          <thead class="bg-white/70 sticky top-0 backdrop-blur">
+            <tr class="text-left text-xs text-slate-600">
+              <th class="px-4 py-3">Código</th>
+              <th class="px-4 py-3">Descripción</th>
+              <th class="px-4 py-3">Línea</th>
+              <th class="px-4 py-3 text-right">Cantidad</th>
+              <th class="px-4 py-3 text-right">PVP</th>
+              <th class="px-4 py-3 text-right">Importe</th>
+            </tr>
+          </thead>
+          <tbody id="bom"></tbody>
+        </table>
+      </div>
+      <div class="p-4 border-t border-slate-200 grid sm:grid-cols-3 gap-4">
+        <div class="rounded-2xl bg-white/55 border border-slate-200 p-4"><div class="text-xs text-slate-600">Subtotal</div><div id="subtotal" class="text-xl font-bold mt-1">—</div></div>
+        <div class="rounded-2xl bg-white/55 border border-slate-200 p-4"><div class="text-xs text-slate-600">Descuento</div><div id="descuentoTxt" class="text-xl font-bold mt-1">—</div></div>
+        <div class="rounded-2xl bg-slate-900 p-4"><div class="text-xs text-slate-300">Total</div><div id="total" class="text-2xl font-extrabold text-white mt-1">—</div></div>
+      </div>
+    </div>
+
+    <footer class="card rounded-3xl p-6">
+      <div class="grid md:grid-cols-[120px_1fr] gap-5 items-center">
+        <img src="./jordi.png" class="w-28 h-36 object-contain bg-slate-50 rounded-2xl border border-slate-200 p-1" alt="Jordi Salvador">
+        <div class="text-slate-700">
+          <p>Esta herramienta ha sido desarrollada con la ayuda de <strong>Inteligencia Artificial</strong> por</p>
+          <p class="text-lg font-semibold text-slate-900 mt-1">Jordi Salvador Noya</p>
+          <p>Jefe de Producto – División de Ventilación</p>
+          <p>Salvador Escoda S.A.</p>
+          <p class="mt-2 text-slate-600">Proyecto desarrollado en el marco del <strong>Máster en Inteligencia Artificial Aplicada – Founderz</strong>.</p>
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  
+<div id="luciaLauncher" class="fixed bottom-6 right-6 z-50 cursor-pointer">
+  <div class="card rounded-2xl p-3 flex items-center gap-3 shadow-xl" onclick="openLucia()">
+    <img src="./lucia.jpeg" class="h-12 w-12 rounded-xl object-cover">
+    <div class="text-sm font-semibold text-slate-900">Asistente calculadora VMC</div>
+  </div>
+</div>
+
+<div id="luciaChatBox" class="hidden fixed bottom-6 right-6 w-80 z-50">
+  <div class="card rounded-3xl overflow-hidden flex flex-col h-[420px] shadow-2xl">
+    <div class="p-4 border-b flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <img src="./lucia.jpeg" class="h-10 w-10 rounded-xl object-cover">
+        <div class="text-sm font-semibold">Lucía · Asistente VMC</div>
+      </div>
+      <button onclick="closeLucia()" class="text-slate-500 hover:text-slate-800 font-bold">✕</button>
+    </div>
+    <div id="chat" class="flex-1 p-4 overflow-auto bg-white/65 space-y-3 nice"></div>
+    <div class="p-4 border-t bg-white/75">
+      <div class="flex gap-2">
+        <input id="chatInput" class="flex-1 rounded-xl border px-3 py-2" placeholder="Escribe tu pregunta…">
+        <button id="chatSend" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</main>
+
+<div style="position:fixed; left:-10000px; top:0; z-index:-1;">
+  <div id="pdfRoot" class="p-10">
+    <div class="flex items-start justify-between gap-6">
+      <div class="flex items-center gap-4">
+        <img src="./logomundoclima.jpeg" style="height:56px" alt="Mundoclima">
+        <div>
+          <div class="text-xl font-extrabold">Informe de cálculo VMC</div>
+          <div class="text-sm text-slate-600">Calculadora VMC Mundoclima con IA comercial integrada</div>
+        </div>
+      </div>
+      <div class="text-right text-sm text-slate-600" id="pdfFechaTxt"></div>
+    </div>
+
+    <div class="mt-4 rounded-2xl border border-slate-200 p-4">
+      <div class="font-semibold">Datos del proyecto</div>
+      <div id="pdfProyecto" class="mt-2 text-sm"></div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mt-4">
+      <div class="rounded-2xl border border-slate-200 p-4">
+        <div class="font-semibold">Resumen técnico</div>
+        <div id="pdfResumen" class="mt-2 text-sm"></div>
+      </div>
+      <div class="rounded-2xl border border-slate-200 p-4">
+        <div class="font-semibold">Configuración</div>
+        <div id="pdfConfig" class="mt-2 text-sm"></div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <div class="font-semibold">Lista de materiales</div>
+      <table class="w-full text-xs mt-2 border border-slate-200 border-collapse">
+        <thead class="bg-slate-50">
+          <tr>
+            <th class="border p-2 text-left">Código</th>
+            <th class="border p-2 text-left">Descripción</th>
+            <th class="border p-2 text-left">Línea</th>
+            <th class="border p-2 text-right">Cantidad</th>
+            <th class="border p-2 text-right">PVP</th>
+            <th class="border p-2 text-right">Importe</th>
+          </tr>
+        </thead>
+        <tbody id="pdfBom"></tbody>
+      </table>
+      <div class="mt-3 flex justify-end">
+        <div class="w-80 text-sm">
+          <div class="flex justify-between"><span>Subtotal</span><b id="pdfSubtotal"></b></div>
+          <div class="flex justify-between"><span>Descuento</span><b id="pdfDesc"></b></div>
+          <div class="flex justify-between"><span>Total</span><b id="pdfTotal"></b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-5 rounded-2xl border border-slate-200 p-4 text-xs">
+      Los precios indicados son orientativos y pueden sufrir variaciones. El presente documento no constituye una oferta vinculante. Para una oferta formal consulte con el Departamento Comercial de Salvador Escoda S.A.
+    </div>
+
+    <div class="mt-5 rounded-2xl border border-slate-200 p-4">
+      <div class="grid grid-cols-[110px_1fr] gap-4 items-center">
+        <img src="./jordi.png" style="width:96px;height:128px;object-fit:contain;background:#f8fafc;border-radius:16px;padding:4px" alt="Jordi Salvador">
+        <div class="text-sm">
+          <p>Esta herramienta ha sido desarrollada con la ayuda de <strong>Inteligencia Artificial</strong> por</p>
+          <p class="font-semibold mt-1">Jordi Salvador Noya</p>
+          <p>Jefe de Producto – División de Ventilación</p>
+          <p>Salvador Escoda S.A.</p>
+          <p class="mt-2">Proyecto desarrollado en el marco del <strong>Máster en Inteligencia Artificial Aplicada – Founderz</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const HS3 = {
+  "0_1": { dp: 28.8, resto: 0, salon: 21.6, min_total: 43.2, min_humedo_local: 21.6, min_hum_total: 43.2 },
+  "2":   { dp: 28.8, resto: 14.4, salon: 28.8, min_total: 86.4, min_humedo_local: 25.2, min_hum_total: 86.4 },
+  "3p":  { dp: 28.8, resto: 14.4, salon: 36, min_total: 118.8, min_humedo_local: 28.8, min_hum_total: 118.8 }
+};
+
+const FLOW = [15,30,45,60,90,120];
+const BAMJ = {15:"CA11651",30:"CA11652",45:"CA11653",60:"CA11654",90:"CA11656",120:"CA11657"};
+const MVF  = {15:"RP03410",30:"RP03411",45:"RP03412",60:"RP03413",90:"RP03415",120:"RP03416"};
+const DECOR = {SLIMVALVE:"CA11712", RONDO:"RP08002", KVADRO:"RP08005"};
+
+const TARIFA = {
+  "VE80001":["RECUPERADOR VMC MUNDOCLIMA ELEGANCE-150",1711],
+  "VE80002":["RECUPERADOR VMC MUNDOCLIMA ELEGANCE-300",2008],
+  "CA11002":["CAJA DE DISTRIBUCIÓN (10 BOCAS X 75MM) SISTEMA ARIA CONNECT",183],
+  "CA11070":["CAJA DE DISTRIBUCIÓN (8 BOCAS X 90MM) SISTEMA ARIA CONNECT",200],
+  "CA11005":["CONECTOR LATERAL 125/160 SISTEMA ARIA CONNECT",34],
+  "CA11006":["ACOPLAMIENTO HORIZONTAL SISTEMA ARIA CONNECT",27],
+  "CA11001":["ROLLO 50M CONDUCTO SEMIFLEXIBLE CIRCULAR 75MM ANTIBACTERIANO ARIA CONNECT",167],
+  "CA11060":["ROLLO 50M CONDUCTO SEMIFLEXIBLE CIRCULAR 90MM ANTIBACTERIANO ARIA CONNECT",248],
+  "CA11003":["PLENUM (3 BOCAS X 75MM) SISTEMA ARIA CONNECT",55],
+  "CA11071":["PLENUM (2 BOCAS X 90MM) SISTEMA ARIA CONNECT",57],
+  "CA11052":["CLIP GRIS PARA SUJECIÓN TUBOS DE 75MM ARIA CONNECT",2],
+  "CA11053":["CLIP ROJO PARA SUJECIÓN TUBOS DE 75MM ARIA CONNECT",2],
+  "CA11072":["CLIP GRIS PARA SUJECIÓN TUBOS DE 90MM ARIA CONNECT",2],
+  "CA11073":["CLIP ROJO PARA SUJECIÓN TUBOS DE 90MM ARIA CONNECT",2],
+  "CA11020":["CONDUCTO AISLANTE 125MM 1 METRO SISTEMA ARIA DURO",29],
+  "CA11021":["CONDUCTO AISLANTE 160MM 1 METRO SISTEMA ARIA DURO",34],
+  "CA11023":["CODO 45º 125 MM SISTEMA ARIA DURO",17],
+  "CA11024":["CODO 45º 160 MM SISTEMA ARIA DURO",21],
+  "CA11032":["CONECTOR 125MM SISTEMA ARIA DURO",15],
+  "CA11033":["CONECTOR 160MM SISTEMA ARIA DURO",17],
+  "CA11039":["SILENCIADOR 125MM SISTEMA ARIA DURO",80],
+  "CA11040":["SILENCIADOR 160MM SISTEMA ARIA DURO",95],
+  "CA11651":["BOCA AUTORREGULABLE BAMJ 15 CON MANGUITO JUNTA A CONDUCTO RIGIDO",25.2],
+  "CA11652":["BOCA AUTORREGULABLE BAMJ 30 CON MANGUITO JUNTA A CONDUCTO RIGIDO",25.2],
+  "CA11653":["BOCA AUTORREGULABLE BAMJ 45 CON MANGUITO JUNTA A CONDUCTO RIGIDO",25.2],
+  "CA11654":["BOCA AUTORREGULABLE BAMJ 60 CON MANGUITO JUNTA A CONDUCTO RIGIDO",25.2],
+  "CA11656":["BOCA AUTORREGULABLE BAMJ 90 CON MANGUITO JUNTA A CONDUCTO RIGIDO",25.2],
+  "CA11657":["BOCA AUTORREGULABLE BAMJ 120 CON MANGUITO JUNTA A CONDUCTO RIGIDO",28.35],
+  "RP03410":["MVF - 125 / 15 REGULADOR DE CAUDAL CONSTANTE",34.5],
+  "RP03411":["MVF - 125 / 30 REGULADOR DE CAUDAL CONSTANTE",34.5],
+  "RP03412":["MVF - 125 / 45 REGULADOR DE CAUDAL CONSTANTE",34.5],
+  "RP03413":["MVF - 125 / 60 REGULADOR DE CAUDAL CONSTANTE",34.5],
+  "RP03415":["MVF - 125 / 90 REGULADOR DE CAUDAL CONSTANTE",34.5],
+  "RP03416":["MVF - 125 / 120 REGULADOR DE CAUDAL CONSTANTE",34.5],
+  "CA11712":["BOCA EXTRACCION/IMPULSION SLIMV4LVE 125 MANGUITO ANCLAJE",27.41],
+  "RP08002":["RONDO - 125 DIFUSOR DE YESO SIN MARCO",80],
+  "RP08005":["KVADRO - 125 DIFUSOR DE YESO SIN MARCO",90],
+  "RP04007":["BOCA IMPULSION SR-IM 125 CON CUELLO MONTAJE",12.7],
+  "RP04002":["BOCA EXTRACCION SR-125 CON CUELLO MONTAJE",13.35]
+};
+
+function eur(n){ return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n || 0); }
+function set(id,v){ document.getElementById(id).textContent = v; }
+function num(v,d=0){ const x = Number(v); return Number.isFinite(x) ? x : d; }
+
+function fillSelect(id,min,max,selected){
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  for(let i=min;i<=max;i++){
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = i;
+    if(i === selected) o.selected = true;
+    el.appendChild(o);
+  }
+}
+
+function tipoHS3(d){
+  if(d <= 1) return '0_1';
+  if(d === 2) return '2';
+  return '3p';
+}
+
+function redondearCaudal(v){
+  for(const f of FLOW){ if(v <= f) return f; }
+  return 120;
+}
+
+function showAlert(msg, type='info'){
+  const box = document.getElementById('alerta');
+  box.className = 'rounded-2xl px-4 py-3 text-sm border';
+  if(type === 'error'){
+    box.classList.add('bg-rose-50','border-rose-200','text-rose-700');
+  }else{
+    box.classList.add('bg-sky-50','border-sky-200','text-sky-700');
+  }
+  box.textContent = msg;
+  box.classList.remove('hidden');
+}
+
+function hideAlert(){
+  document.getElementById('alerta').classList.add('hidden');
+}
+
+function getProject(){
+  return {
+    cliente: cliente.value.trim(),
+    obra: obra.value.trim(),
+    comercial: comercial.value.trim(),
+    fecha: fecha.value
+  };
+}
+
+function getInputs(){
+  return {
+    m2: num(m2.value),
+    dorm: num(dormitorios.value),
+    ban: num(banos.value),
+    coc: num(cocinas.value),
+    lav: num(lavaderos.value),
+    sal: num(salon.value),
+    com: num(comedor.value),
+    des: num(despacho.value),
+    otr: num(otrasSecas.value),
+    reg: regulacion.value,
+    decor: decorativa.value,
+    aisImp: aisladoImp.value,
+    aisRet: aisladoRet.value,
+    codImp: codosImp.value,
+    codRet: codosRet.value,
+    sil: silenciadores.checked,
+    desc: num(descuento.value, 45)
+  };
+}
+
+function calcDryZones(i, h){
+  const zones = [];
+  if(i.dorm >= 1) zones.push({name:'Dormitorio principal', flow:h.dp, tipo:'seca'});
+  for(let k=0;k<Math.max(0,i.dorm-1);k++) zones.push({name:'Dormitorio secundario', flow:h.resto, tipo:'seca'});
+  for(let k=0;k<i.sal;k++) zones.push({name:'Salón / estar', flow:h.salon, tipo:'seca'});
+  for(let k=0;k<i.com;k++) zones.push({name:'Comedor', flow:h.salon, tipo:'seca'});
+  for(let k=0;k<i.des;k++) zones.push({name:'Despacho', flow:h.salon, tipo:'seca'});
+  for(let k=0;k<i.otr;k++) zones.push({name:'Otra seca', flow:h.salon, tipo:'seca'});
+
+  const calc = zones.reduce((a,z)=>a+z.flow,0);
+  const applied = Math.max(calc, h.min_total);
+  return { zones, calc, applied };
+}
+
+function calcWetZones(i, h){
+  let zones = [];
+  for(let k=0;k<i.coc;k++) zones.push({name:'Cocina', tipo:'humeda'});
+  for(let k=0;k<i.lav;k++) zones.push({name:'Lavadero', tipo:'humeda'});
+  for(let k=0;k<i.ban;k++) zones.push({name:'Baño', tipo:'humeda'});
+
+  const count = zones.length;
+  if(!count) return { zones:[], applied:0 };
+
+  const minPerLocal = redondearCaudal(h.min_humedo_local);
+  const allowed = FLOW.filter(x => x >= minPerLocal);
+  const max = count * 120;
+
+  const dp = Array.from({length: count+1}, () => Array(max+1).fill(null));
+  dp[0][0] = [];
+
+  for(let idx=0; idx<count; idx++){
+    for(let s=0; s<=max; s++){
+      if(dp[idx][s] !== null){
+        for(const a of allowed){
+          if(s + a <= max && dp[idx+1][s+a] === null){
+            dp[idx+1][s+a] = dp[idx][s].concat(a);
+          }
+        }
+      }
+    }
+  }
+
+  let best = null;
+  for(let s=0; s<=max; s++){
+    if(dp[count][s] !== null && s >= h.min_hum_total){
+      best = dp[count][s];
+      break;
+    }
+  }
+  if(!best) best = Array(count).fill(allowed[allowed.length-1]);
+
+  best = best.sort((a,b)=>b-a);
+  zones = zones
+    .sort((a,b)=>({Cocina:3,Lavadero:2,Baño:1}[b.name]-{Cocina:3,Lavadero:2,Baño:1}[a.name]))
+    .map((z,idx)=>({ ...z, flow: best[idx] }));
+
+  return { zones, applied: best.reduce((a,b)=>a+b,0) };
+}
+
+function calcBoxes(zoneCount, sys){
+  const first = sys === '125' ? 7 : 6;
+  let boxes = 1;
+  let mouths = first;
+  while(mouths < zoneCount){
+    boxes++;
+    mouths = first + (boxes - 1) * 4;
+  }
+  return {
+    boxes,
+    couplings: Math.max(0, boxes - 1),
+    mouths
+  };
+}
+
+function addItem(items, code, qty, linea){
+  if(!qty || qty <= 0 || !TARIFA[code]) return;
+  items.push({
+    code,
+    desc: TARIFA[code][0],
+    linea,
+    qty,
+    pvp: TARIFA[code][1],
+    total: qty * TARIFA[code][1]
+  });
+}
+
+function buildBOM(state){
+  const i = state.i;
+  const sys = state.total <= 150 ? '125' : '160';
+
+  const REC  = sys === '125' ? 'VE80001' : 'VE80002';
+  const BOX  = sys === '125' ? 'CA11002' : 'CA11070';
+  const PL   = sys === '125' ? 'CA11003' : 'CA11071';
+  const ROLL = sys === '125' ? 'CA11001' : 'CA11060';
+  const RCLIP= sys === '125' ? 'CA11053' : 'CA11073';
+  const GCLIP= sys === '125' ? 'CA11052' : 'CA11072';
+  const ISO  = sys === '125' ? 'CA11020' : 'CA11021';
+  const CODO = sys === '125' ? 'CA11023' : 'CA11024';
+  const MANG = sys === '125' ? 'CA11032' : 'CA11033';
+  const SIL  = sys === '125' ? 'CA11039' : 'CA11040';
+
+  const secCount = state.dry.zones.length;
+  const humCount = state.wet.zones.length;
+
+  const boxSec = calcBoxes(secCount, sys);
+  const boxHum = calcBoxes(humCount, sys);
+
+  if(secCount > boxSec.mouths || humCount > boxHum.mouths){
+    return { error: 'Contactar con el departamento de ventilación de Salvador Escoda S.A. de su zona.' };
+  }
+
+  const rolls = Math.max(1, Math.ceil(i.m2 / 50));
+  const aisImp = i.aisImp === '' ? 10 : num(i.aisImp, 10);
+  const aisRet = i.aisRet === '' ? 10 : num(i.aisRet, 10);
+  const codImp = i.codImp === '' ? 2 : num(i.codImp, 2);
+  const codRet = i.codRet === '' ? 2 : num(i.codRet, 2);
+
+  const items = [];
+  addItem(items, REC, 1, 'General');
+
+  addItem(items, BOX, boxSec.boxes, 'Impulsión');
+  addItem(items, 'CA11005', boxSec.boxes, 'Impulsión');
+  addItem(items, 'CA11006', boxSec.couplings, 'Impulsión');
+
+  addItem(items, BOX, boxHum.boxes, 'Retorno');
+  addItem(items, 'CA11005', boxHum.boxes, 'Retorno');
+  addItem(items, 'CA11006', boxHum.couplings, 'Retorno');
+
+  addItem(items, PL, secCount, 'Impulsión');
+  addItem(items, PL, humCount, 'Retorno');
+
+  addItem(items, ROLL, rolls, 'General');
+  addItem(items, RCLIP, rolls * 10, 'General');
+  addItem(items, GCLIP, rolls * 10, 'General');
+
+  addItem(items, ISO, aisImp, 'Impulsión');
+  addItem(items, ISO, aisRet, 'Retorno');
+
+  addItem(items, CODO, codImp, 'Impulsión');
+  addItem(items, CODO, codRet, 'Retorno');
+
+  if(i.sil){
+    addItem(items, SIL, 1, 'Impulsión');
+    addItem(items, SIL, 1, 'Retorno');
+  }
+
+  addItem(items, MANG, Math.max(0, aisImp + aisRet + codImp + codRet - 4), 'General');
+
+  const allZones = [
+    ...state.dry.zones.map(z => ({...z, flow: redondearCaudal(z.flow)})),
+    ...state.wet.zones
+  ];
+
+  const counts = {};
+  allZones.forEach(z => {
+    const code = i.reg === 'BAMJ' ? BAMJ[z.flow] : MVF[z.flow];
+    counts[code] = (counts[code] || 0) + 1;
+  });
+
+  if(i.reg === 'MVF'){
+    if(i.decor === 'SR'){
+      counts['RP04007'] = (counts['RP04007'] || 0) + state.dry.zones.length;
+      counts['RP04002'] = (counts['RP04002'] || 0) + state.wet.zones.length;
+    } else {
+      counts[DECOR[i.decor]] = (counts[DECOR[i.decor]] || 0) + allZones.length;
+    }
+  }
+
+  Object.keys(counts).forEach(code => {
+    let linea = 'General';
+    if(code === 'RP04007') linea = 'Impulsión';
+    if(code === 'RP04002') linea = 'Retorno';
+    addItem(items, code, counts[code], linea);
+  });
+
+  const subtotal = items.reduce((a,it)=>a+it.total,0);
+  const descuento = subtotal * (i.desc / 100);
+  const total = subtotal - descuento;
+
+  return {
+    sys, REC, items, subtotal, descuento, total,
+    rolls, secCount, humCount, boxSec, boxHum,
+    aisImp, aisRet, codImp, codRet
+  };
+}
+
+function renderBOM(b){
+  bom.innerHTML = '';
+  b.items.forEach(it => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="px-4 py-3 font-mono text-xs">${it.code}</td>
+      <td class="px-4 py-3">${it.desc}</td>
+      <td class="px-4 py-3">${it.linea}</td>
+      <td class="px-4 py-3 text-right">${it.qty}</td>
+      <td class="px-4 py-3 text-right">${eur(it.pvp)}</td>
+      <td class="px-4 py-3 text-right font-semibold">${eur(it.total)}</td>
+    `;
+    bom.appendChild(tr);
+  });
+  set('subtotal', eur(b.subtotal));
+  set('descuentoTxt', `${descuento.value}% (${eur(b.descuento)})`);
+  set('total', eur(b.total));
+}
+
+function calcular(){
+  hideAlert();
+  const p = getProject();
+  const i = getInputs();
+
+  if(i.desc > 55){
+    showAlert('Consultar con departamento de Ventilación','error');
+    return;
+  }
+  if(i.m2 <= 0){
+    showAlert('Introduce una superficie válida.','error');
+    return;
+  }
+
+  const tip = tipoHS3(i.dorm);
+  const h = HS3[tip];
+  const dry = calcDryZones(i, h);
+  const wet = calcWetZones(i, h);
+  const total = Math.max(dry.applied, wet.applied);
+
+  if(total > 300){
+    showAlert('Contactar con el departamento de ventilación de Salvador Escoda S.A. de su zona.','error');
+    return;
+  }
+
+  const b = buildBOM({i, dry, wet, total});
+  if(b.error){
+    showAlert(b.error,'error');
+    return;
+  }
+
+  window.__STATE__ = { p, i, h, dry, wet, total, b, tip };
+
+  set('tipologia', tip === '0_1' ? '0–1 dormitorios' : tip === '2' ? '2 dormitorios' : '3+ dormitorios');
+  set('caudalTotal', total.toFixed(1));
+  set('sistema', b.sys === '125' ? 'Sistema 125 · ARIA CONNECT 75' : 'Sistema 160 · ARIA CONNECT 90');
+  set('equipo', TARIFA[b.REC][0]);
+
+  set('secas', b.secCount);
+  set('humedas', b.humCount);
+  set('rollos', b.rolls);
+  set('cajas', `${b.boxSec.boxes} / ${b.boxHum.boxes}`);
+  set('plenums', `${b.secCount} / ${b.humCount}`);
+  set('secosApl', dry.applied.toFixed(1));
+  set('humApl', wet.applied.toFixed(1));
+
+  set('b_dp', h.dp.toFixed(1));
+  set('b_resto', (Math.max(0, i.dorm - 1) * h.resto).toFixed(1));
+  set('b_salon', (((i.sal + i.com + i.des + i.otr) ? h.salon : 0)).toFixed(1));
+  set('b_hn', b.humCount);
+  set('b_hlocal', h.min_humedo_local.toFixed(1));
+  set('b_htotal', h.min_hum_total.toFixed(1));
+
+  renderBOM(b);
+  showAlert('Cálculo actualizado correctamente.','info');
+}
+
+function fillPdf(){
+  const s = window.__STATE__;
+  if(!s) return false;
+
+  pdfFechaTxt.textContent = s.p.fecha || new Date().toLocaleDateString('es-ES');
+  pdfProyecto.innerHTML = `
+    <div><b>Cliente:</b> ${s.p.cliente || '-'}</div>
+    <div><b>Obra:</b> ${s.p.obra || '-'}</div>
+    <div><b>Comercial:</b> ${s.p.comercial || '-'}</div>
+    <div><b>Fecha:</b> ${s.p.fecha || '-'}</div>
+  `;
+  pdfResumen.innerHTML = `
+    <div><b>Caudal total:</b> ${s.total.toFixed(1)} m³/h</div>
+    <div><b>Sistema:</b> ${s.b.sys === '125' ? 'Sistema 125 · ARIA CONNECT 75' : 'Sistema 160 · ARIA CONNECT 90'}</div>
+    <div><b>Recuperador:</b> ${TARIFA[s.b.REC][0]}</div>
+    <div><b>Zonas secas:</b> ${s.b.secCount}</div>
+    <div><b>Zonas húmedas:</b> ${s.b.humCount}</div>
+  `;
+  pdfConfig.innerHTML = `
+    <div><b>Cajas impulsión:</b> ${s.b.boxSec.boxes}</div>
+    <div><b>Cajas retorno:</b> ${s.b.boxHum.boxes}</div>
+    <div><b>Plenums impulsión:</b> ${s.b.secCount}</div>
+    <div><b>Plenums retorno:</b> ${s.b.humCount}</div>
+    <div><b>Regulación:</b> ${s.i.reg === 'BAMJ' ? 'Bocas autoregulables' : `MVF + ${s.i.decor}`}</div>
+    <div><b>Aislado:</b> ${s.b.aisImp} m / ${s.b.aisRet} m</div>
+  `;
+
+  pdfBom.innerHTML = '';
+  s.b.items.forEach(it => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="border p-2">${it.code}</td>
+      <td class="border p-2">${it.desc}</td>
+      <td class="border p-2">${it.linea}</td>
+      <td class="border p-2 text-right">${it.qty}</td>
+      <td class="border p-2 text-right">${eur(it.pvp)}</td>
+      <td class="border p-2 text-right"><b>${eur(it.total)}</b></td>
+    `;
+    pdfBom.appendChild(tr);
+  });
+
+  pdfSubtotal.textContent = eur(s.b.subtotal);
+  pdfDesc.textContent = `${s.i.desc}% (${eur(s.b.descuento)})`;
+  pdfTotal.textContent = eur(s.b.total);
+
+  return true;
+}
+
+
+
+function descargarPDF(){
+  try{
+    if(!window.__STATE__) calcular();
+    if(!window.__STATE__) return;
+    if(!fillPdf()) return;
+
+    const contenido = document.getElementById('pdfRoot').innerHTML;
+    const w = window.open('', '_blank');
+    if(!w){
+      alert('El navegador ha bloqueado la ventana de impresión. Permite ventanas emergentes e inténtalo de nuevo.');
+      return;
+    }
+
+    w.document.open();
+    w.document.write(`
+      <!doctype html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>Informe VMC Mundoclima</title>
+        <style>
+          @page { size: A4; margin: 10mm; }
+          html, body { margin:0; padding:0; background:#fff; color:#000; font-family: Arial, sans-serif; }
+          body { padding: 0; }
+          * { box-sizing: border-box; }
+          img { max-width: 100%; }
+          table { width:100%; border-collapse: collapse; }
+          th, td { border:1px solid #cbd5e1; padding:6px; font-size:12px; vertical-align: top; }
+          .border { border:1px solid #cbd5e1; }
+          .border-collapse { border-collapse: collapse; }
+          .rounded-2xl, .rounded-xl, .rounded-3xl { border-radius: 12px; }
+          .p-10 { padding: 24px; }
+          .p-4 { padding: 12px; }
+          .p-2 { padding: 6px; }
+          .mt-2 { margin-top: 8px; }
+          .mt-3 { margin-top: 12px; }
+          .mt-4 { margin-top: 16px; }
+          .mt-5 { margin-top: 20px; }
+          .grid { display: grid; }
+          .grid-cols-2 { grid-template-columns: 1fr 1fr; }
+          .gap-4 { gap: 16px; }
+          .items-center { align-items: center; }
+          .flex { display:flex; }
+          .justify-between { justify-content: space-between; }
+          .justify-end { justify-content:flex-end; }
+          .items-start { align-items:flex-start; }
+          .gap-6 { gap: 24px; }
+          .text-right { text-align:right; }
+          .text-left { text-align:left; }
+          .text-xs { font-size: 11px; }
+          .text-sm { font-size: 12px; }
+          .text-xl { font-size: 22px; }
+          .font-semibold, .font-extrabold { font-weight: 700; }
+          .w-80 { width: 320px; }
+          .bg-slate-50 { background: #f8fafc; }
+          .text-slate-600 { color:#475569; }
+          .text-slate-900 { color:#0f172a; }
+        </style>
+      </head>
+      <body>
+        <div style="width:190mm; margin:0 auto;">
+          ${contenido}
+        </div>
+      </body>
+      </html>
+    `);
+    w.document.close();
+
+    setTimeout(() => {
+      w.focus();
+      w.print();
+    }, 600);
+  }catch(e){
+    console.error(e);
+    alert('Error generando PDF. Usa Imprimir / Guardar como PDF del navegador.');
+  }
+}
+
+
+
+function say(role, text){
+  const d = document.createElement('div');
+  d.className = 'flex ' + (role === 'u' ? 'justify-end' : 'justify-start');
+  d.innerHTML = `
+    <div class="max-w-[88%] rounded-2xl px-4 py-3 border ${role === 'u' ? 'bg-sky-50 border-sky-200' : 'bg-slate-50 border-slate-200'}">
+      <div class="text-xs ${role === 'u' ? 'text-sky-700' : 'text-slate-600'}">${role === 'u' ? 'Tú' : 'Lucía'}</div>
+      <div class="text-sm text-slate-900 mt-1">${text}</div>
+    </div>
+  `;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function respuestaLucia(q){
+  q = q.toLowerCase();
+  if(q.includes('hs3')) return 'El cálculo sigue el CTE HS3: dormitorio principal 28,8 m³/h, secundarios 14,4 m³/h y salas/comedor según la tipología.';
+  if(q.includes('aria')) return 'ARIA CONNECT es la red semiflexible antibacteriana. ARIA ADURO es la red rígida aislada para tramos principales.';
+  if(q.includes('pdf')) return 'El PDF incluye cliente, obra, comercial, fecha, materiales, precios, descuento, total y aviso comercial.';
+  return 'Puedo ayudarte con HS3, recuperadores ELEGANCE, ARIA CONNECT, bocas BAMJ, MVF y el informe PDF.';
+}
+
+
+function openLucia(){
+  document.getElementById('luciaLauncher').classList.add('hidden');
+  document.getElementById('luciaChatBox').classList.remove('hidden');
+}
+
+function closeLucia(){
+  document.getElementById('luciaChatBox').classList.add('hidden');
+  document.getElementById('luciaLauncher').classList.remove('hidden');
+}
+
+function enviarChat(){
+
+  const q = chatInput.value.trim();
+  if(!q) return;
+  say('u', q);
+  chatInput.value = '';
+  setTimeout(()=>say('b', respuestaLucia(q)), 120);
+}
+
+
+function toggleDecorativa(){
+  const wrap = document.getElementById('decorativaWrap');
+  if(!wrap) return;
+  if(regulacion.value === 'MVF'){
+    wrap.classList.remove('hidden');
+  } else {
+    wrap.classList.add('hidden');
+  }
+}
+
+function resetAll(){
+  cliente.value = '';
+  obra.value = '';
+  comercial.value = 'Jordi Salvador Noya';
+  fecha.valueAsDate = new Date();
+
+  m2.value = 90;
+  dormitorios.value = '2';
+  banos.value = '1';
+  cocinas.value = '1';
+  lavaderos.value = '0';
+  salon.value = '1';
+  comedor.value = '0';
+  despacho.value = '0';
+  otrasSecas.value = '0';
+
+  regulacion.value = 'MVF';
+  decorativa.value = 'RONDO';
+
+  aisladoImp.value = '';
+  aisladoRet.value = '';
+  codosImp.value = '';
+  codosRet.value = '';
+  silenciadores.checked = true;
+  descuento.value = 45;
+
+  bom.innerHTML = '';
+  chat.innerHTML = '';
+  window.__STATE__ = null;
+
+  ['tipologia','caudalTotal','sistema','equipo','secas','humedas','rollos','cajas','plenums','secosApl','humApl','b_dp','b_resto','b_salon','b_hn','b_hlocal','b_htotal','subtotal','descuentoTxt','total']
+    .forEach(id => set(id,'—'));
+
+  hideAlert();
+  toggleDecorativa();
+  say('b', 'Hola, soy Lucía 👋 Puedo ayudarte con HS3, recuperadores ELEGANCE, ARIA CONNECT y el informe PDF.');
+}
+
+fillSelect('dormitorios',0,10,2);
+fillSelect('banos',0,10,1);
+fillSelect('cocinas',0,2,1);
+fillSelect('lavaderos',0,5,0);
+fillSelect('salon',0,3,1);
+fillSelect('comedor',0,3,0);
+fillSelect('despacho',0,3,0);
+fillSelect('otrasSecas',0,10,0);
+
+btnCalcular.onclick = calcular;
+btnPDF.onclick = descargarPDF;
+btnPDFTop.onclick = descargarPDF;
+btnReset.onclick = resetAll;
+btnEjemplo.onclick = () => {
+  cliente.value = 'Promociones Mediterráneo';
+  obra.value = 'Vivienda unifamiliar ejemplo';
+  m2.value = 150;
+  dormitorios.value = '3';
+  banos.value = '2';
+  cocinas.value = '1';
+  lavaderos.value = '1';
+  salon.value = '1';
+  comedor.value = '1';
+  despacho.value = '1';
+  regulacion.value = 'MVF';
+  decorativa.value = 'SR';
+  calcular();
+};
+
+regulacion.onchange = toggleDecorativa;
+chatSend.onclick = enviarChat;
+chatInput.onkeydown = (e) => { if(e.key === 'Enter') enviarChat(); };
+
+toggleDecorativa();
+resetAll();
+</script>
+</body>
+</html>
